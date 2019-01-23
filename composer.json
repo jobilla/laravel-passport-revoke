@@ -22,5 +22,12 @@
         "psr-4": {
             "Jobilla\\PassportRevoke\\": "src/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jobilla\\PassportRevoke\\PassportRevokeServiceProvider"
+            ]
+        }
     }
 }
