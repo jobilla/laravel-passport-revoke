@@ -1,0 +1,26 @@
+{
+    "name": "jobilla/passport-revoke",
+    "description": "Revoke Laravel Passport tokens with a simple Artisan command",
+    "type": "library",
+    "require": {
+        "illuminate/console": "5.7.*",
+        "laravel/passport": "^7.0",
+        "illuminate/support": "^5.7"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Leo Sjöberg",
+            "email": "leo@jobilla.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Jobilla\\PassportRevoke\\": "src/"
+        }
+    }
+}
