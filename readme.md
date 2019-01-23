@@ -9,7 +9,7 @@ user to have a newly issued token.
 
 Install the package using Composer.
 ```
-composer require jobilla/laravel-passport-revoke
+composer require jobilla/passport-revoke
 ```
 
 ## Usage
