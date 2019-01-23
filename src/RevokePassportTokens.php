@@ -14,21 +14,7 @@ class RevokePassportTokens extends Command
     protected $signature = 'passport:revoke {token?} {--user=}';
     protected $description = 'Revoke passport tokens';
 
-    /**
-     * @var TokenRepository
-     */
-    private $tokenRepository;
-
-    /**
-     * RevokePassportTokens constructor.
-     * @param TokenRepository $tokenRepository
-     */
-    public function __construct(TokenRepository $tokenRepository)
-    {
-        $this->tokenRepository = $tokenRepository;
-    }
-
-    public function handle()
+    public function handle(TokenRepository $tokenRepository)
     {
         if (! ($this->option('user') || $this->argument('token'))) {
             $this->confirm('You did not provide any user or token. All Passport tokens will be revoked. Continue?');
@@ -36,7 +22,7 @@ class RevokePassportTokens extends Command
 
         if ($token = $this->argument('token')) {
             $this->info("Revoking token $token...");
-            $this->tokenRepository->find($token)->revoke();
+            $tokenRepository->find($token)->revoke();
             $this->info('✓ Token successfully revoked');
 
             return;
