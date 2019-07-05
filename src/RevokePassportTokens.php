@@ -11,13 +11,15 @@ use Symfony\Component\Console\Helper\ProgressBar;
 
 class RevokePassportTokens extends Command
 {
-    protected $signature = 'passport:revoke {token?} {--user=}';
+    protected $signature = 'passport:revoke {token?} {--user=} {--client=}';
     protected $description = 'Revoke passport tokens';
 
     public function handle(TokenRepository $tokenRepository)
     {
-        if (! ($this->option('user') || $this->argument('token'))) {
-            $this->confirm('You did not provide any user or token. All Passport tokens will be revoked. Continue?');
+        if (! ($this->option('user') || $this->argument('token') || $this->option('client'))) {
+            $this->confirm(
+                'You did not provide any user, client or token. All Passport tokens will be revoked. Continue?'
+            );
         }
 
         if ($token = $this->argument('token')) {
@@ -35,6 +37,9 @@ class RevokePassportTokens extends Command
         if ($user = $this->option('user')) {
             $query->where('user_id', $user);
             $this->info("Revoking all tokens for user $user...");
+        } elseif ($client = $this->option('client')) {
+            $query->where('client_id', $client);
+            $this->info("Revoking all tokens for client $client...");
         } else {
             $this->info('Revoking all active tokens...');
         }
