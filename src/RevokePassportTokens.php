@@ -16,12 +16,6 @@ class RevokePassportTokens extends Command
 
     public function handle(TokenRepository $tokenRepository)
     {
-        if (! ($this->option('user') || $this->argument('token') || $this->option('client'))) {
-            $this->confirm(
-                'You did not provide any user, client or token. All Passport tokens will be revoked. Continue?'
-            );
-        }
-
         if ($token = $this->argument('token')) {
             $this->info("Revoking token $token...");
             $tokenRepository->find($token)->revoke();
@@ -30,18 +24,38 @@ class RevokePassportTokens extends Command
             return;
         }
 
+        $user = $this->option('user');
+        $client = $this->option('client');
+
         $query = Passport::token()->newQuery()
             ->where('revoked', false)
             ->where('expires_at', '>=', Carbon::now());
 
-        if ($user = $this->option('user')) {
-            $query->where('user_id', $user);
-            $this->info("Revoking all tokens for user $user...");
-        } elseif ($client = $this->option('client')) {
-            $query->where('client_id', $client);
-            $this->info("Revoking all tokens for client $client...");
-        } else {
-            $this->info('Revoking all active tokens...');
+        switch (true) {
+            case $user && $client:
+                $query->where('user_id', $user);
+                $query->where('client_id', $client);
+                $this->info("Revoking all tokens for user $user and client $client...");
+                break;
+
+            case $user:
+                $query->where('user_id', $user);
+                $this->info("Revoking all tokens for user $user...");
+                break;
+
+            case $client:
+                $query->where('client_id', $client);
+                $this->info("Revoking all tokens for client $client...");
+                break;
+
+            default:
+                if (!$this->confirm(
+                    'You did not provide any user, client or token. All Passport tokens will be revoked. Continue?'
+                )) {
+                    return;
+                }
+
+                $this->info('Revoking all active tokens...');
         }
 
         $progressBar = new ProgressBar($this->getOutput(), $total = $query->count());
