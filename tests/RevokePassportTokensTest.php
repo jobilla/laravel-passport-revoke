@@ -31,8 +31,7 @@ class RevokePassportTokensTest extends TestCase
         ]);
 
         $this->artisan(RevokePassportTokens::class, ['token' => 'f8097432-b83e-4503-9c83-e3906655a58b'])
-            ->assertExitCode(0)
-            ->run();
+            ->assertExitCode(0);
         $this->assertEquals(1, Token::query()->where('revoked', false)->count());
         $this->assertEquals(1, Token::query()->where('revoked', true)->count());
     }
@@ -61,8 +60,7 @@ class RevokePassportTokensTest extends TestCase
                 'You did not provide any user, client or token. All Passport tokens will be revoked. Continue?',
                 true
             )
-            ->assertExitCode(0)
-            ->run();
+            ->assertExitCode(0);
 
         $this->assertEquals(3, Token::query()->where('revoked', true)->count());
     }
@@ -91,8 +89,7 @@ class RevokePassportTokensTest extends TestCase
                 'You did not provide any user, client or token. All Passport tokens will be revoked. Continue?',
                 false
             )
-            ->assertExitCode(0)
-            ->run();
+            ->assertExitCode(0);
 
         $this->assertEquals(3, Token::query()->where('revoked', false)->count());
     }
@@ -127,8 +124,7 @@ class RevokePassportTokensTest extends TestCase
         );
 
         $this->artisan(RevokePassportTokens::class, ['--user' => '1'])
-            ->assertExitCode(0)
-            ->run();
+            ->assertExitCode(0);
 
         $this->assertEquals(
             2,
@@ -170,8 +166,7 @@ class RevokePassportTokensTest extends TestCase
         );
 
         $this->artisan(RevokePassportTokens::class, ['--client' => '1'])
-            ->assertExitCode(0)
-            ->run();
+            ->assertExitCode(0);
 
         $this->assertEquals(
             2,
@@ -211,8 +206,7 @@ class RevokePassportTokensTest extends TestCase
         $this->assertEquals(4, Token::query()->where('revoked', false)->count());
 
         $this->artisan(RevokePassportTokens::class, ['--client' => '2', '--user' => '1'])
-            ->assertExitCode(0)
-            ->run();
+            ->assertExitCode(0);
 
         $this->assertEquals(1, Token::query()->where('revoked', true)->count());
         $this->assertEquals(

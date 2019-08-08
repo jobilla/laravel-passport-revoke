@@ -34,7 +34,7 @@ matrix:
 
 before_install:
   - travis_retry composer self-update
-  - travis_retry composer require --no-update --no-interaction "illuminate/support:${LARAVEL}" "orchestra/testbench:${TESTBENCH}"
+  - travis_retry composer require --no-update --no-interaction "illuminate/support:${LARAVEL}" "illuminate/console:${LARAVEL}" "orchestra/testbench:${TESTBENCH}"
 
 install:
   - travis_retry composer update ${COMPOSER_FLAGS} --prefer-dist --no-interaction --no-suggest
