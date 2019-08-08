@@ -16,13 +16,6 @@ class RevokePassportTokensTest extends TestCase
 {
     use MockeryPHPUnitIntegration, RefreshDatabase;
 
-    protected function setUp()
-    {
-        parent::setUp();
-
-        Carbon::setTestNow('2019-08-05 12:00:00');
-    }
-
     public function test_it_can_revoke_a_specific_token()
     {
         $this->createTokens([
@@ -245,6 +238,8 @@ class RevokePassportTokensTest extends TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        Carbon::setTestNow('2019-08-05 12:00:00');
+
         // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'testbench');
         $app['config']->set('database.connections.testbench', [
