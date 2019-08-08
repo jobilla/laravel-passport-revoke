@@ -6,13 +6,11 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Jobilla\PassportRevoke\PassportRevokeServiceProvider;
 use Jobilla\PassportRevoke\RevokePassportTokens;
-use Laravel\Passport\Passport;
 use Laravel\Passport\PassportServiceProvider;
 use Laravel\Passport\Token;
-use Laravel\Passport\TokenRepository;
-use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Orchestra\Testbench\TestCase;
+use Ramsey\Uuid\Uuid;
 
 class RevokePassportTokensTest extends TestCase
 {
@@ -27,18 +25,16 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_a_specific_token()
     {
-        Token::query()->forceCreate([
-            'id' => 'f8097432-b83e-4503-9c83-e3906655a58b',
-            'client_id' => 1,
-            'revoked' => false,
-            'expires_at' => Carbon::now()->addMonth(),
-        ]);
-
-        Token::query()->forceCreate([
-            'id' => 'dbca267d-acd8-4b6c-b770-e0035c31e2ca',
-            'client_id' => 1,
-            'revoked' => false,
-            'expires_at' => Carbon::now()->addMonth(),
+        $this->createTokens([
+            [
+                'id' => 'f8097432-b83e-4503-9c83-e3906655a58b',
+                'client_id' => 1,
+                'revoked' => false,
+            ],
+            [
+                'client_id' => 1,
+                'revoked' => false,
+            ]
         ]);
 
         $this->artisan(RevokePassportTokens::class, ['token' => 'f8097432-b83e-4503-9c83-e3906655a58b'])
@@ -50,24 +46,18 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_allows_revoking_all_tokens_if_no_conditions_are_passed()
     {
-        Token::query()->insert([
+        $this->createTokens([
             [
-                'id' => 'b5b7ca3e-80e4-4b89-8905-8099e1a613cd',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
             ],
             [
-                'id' => '469203f6-ba9d-4acf-88ed-c77dff94f4f6',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
             ],
             [
-                'id' => '224f1318-9af1-4eb4-b3f3-0949b9e94fdd',
                 'client_id' => 2,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
             ],
         ]);
 
@@ -86,24 +76,18 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_does_not_revoke_all_tokens_if_the_user_does_not_confirm()
     {
-        Token::query()->insert([
+        $this->createTokens([
             [
-                'id' => 'b5b7ca3e-80e4-4b89-8905-8099e1a613cd',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
             ],
             [
-                'id' => '469203f6-ba9d-4acf-88ed-c77dff94f4f6',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
             ],
             [
-                'id' => '224f1318-9af1-4eb4-b3f3-0949b9e94fdd',
                 'client_id' => 2,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
             ],
         ]);
 
@@ -122,26 +106,20 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_tokens_for_a_given_user()
     {
-        Token::query()->insert([
+        $this->createTokens([
             [
-                'id' => 'b5b7ca3e-80e4-4b89-8905-8099e1a613cd',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 1,
             ],
             [
-                'id' => '469203f6-ba9d-4acf-88ed-c77dff94f4f6',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 1
             ],
             [
-                'id' => '224f1318-9af1-4eb4-b3f3-0949b9e94fdd',
                 'client_id' => 2,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 2
             ],
         ]);
@@ -171,26 +149,20 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_tokens_for_a_given_client()
     {
-        Token::query()->insert([
+        $this->createTokens([
             [
-                'id' => 'b5b7ca3e-80e4-4b89-8905-8099e1a613cd',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 1,
             ],
             [
-                'id' => '469203f6-ba9d-4acf-88ed-c77dff94f4f6',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 1
             ],
             [
-                'id' => '224f1318-9af1-4eb4-b3f3-0949b9e94fdd',
                 'client_id' => 2,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 2
             ],
         ]);
@@ -220,33 +192,25 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_tokens_for_a_given_client_and_user()
     {
-        Token::query()->insert([
+        $this->createTokens([
             [
-                'id' => 'b5b7ca3e-80e4-4b89-8905-8099e1a613cd',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 1,
             ],
             [
-                'id' => '469203f6-ba9d-4acf-88ed-c77dff94f4f6',
                 'client_id' => 1,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 1
             ],
             [
-                'id' => '4ff54f73-fd03-4f2c-9b05-4955070040d6',
                 'client_id' => 2,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 1
             ],
             [
-                'id' => '224f1318-9af1-4eb4-b3f3-0949b9e94fdd',
                 'client_id' => 2,
                 'revoked' => 0,
-                'expires_at' => Carbon::now()->addMonth(),
                 'user_id' => 2
             ],
         ]);
@@ -288,5 +252,16 @@ class RevokePassportTokensTest extends TestCase
             'database' => ':memory:',
             'prefix'   => '',
         ]);
+    }
+
+    private function createTokens(array $tokens)
+    {
+        Token::query()->insert(array_map(function ($token) {
+            return array_merge([
+                'id' => Uuid::uuid4()->toString(),
+                'expires_at' => Carbon::now()->addMonth(),
+                'user_id' => 1,
+            ], $token);
+        }, $tokens));
     }
 }
