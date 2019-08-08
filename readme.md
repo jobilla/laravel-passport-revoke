@@ -1,4 +1,5 @@
 # Laravel Passport Revoke
+[![Build Status](https://travis-ci.org/jobilla/laravel-passport-revoke.svg?branch=master)](https://travis-ci.org/jobilla/laravel-passport-revoke)
 
 This package provides a single Artisan command for revoking a set of
 active Laravel Passport tokens, to ease mass revocations. This can
