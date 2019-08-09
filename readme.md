@@ -1,6 +1,11 @@
 # Laravel Passport Revoke
 [![Build Status](https://travis-ci.org/jobilla/laravel-passport-revoke.svg?branch=master)](https://travis-ci.org/jobilla/laravel-passport-revoke)[![codecov](https://codecov.io/gh/jobilla/laravel-passport-revoke/branch/master/graph/badge.svg)](https://codecov.io/gh/jobilla/laravel-passport-revoke)
 
+[![Latest Stable Version](https://poser.pugx.org/jobilla/passport-revoke/v/stable)](https://packagist.org/packages/jobilla/passport-revoke)
+[![Build Status](https://travis-ci.org/jobilla/laravel-passport-revoke.svg?branch=master)](https://travis-ci.org/jobilla/laravel-passport-revoke)
+[![codecov](https://codecov.io/gh/jobilla/laravel-passport-revoke/branch/master/graph/badge.svg)](https://codecov.io/gh/jobilla/laravel-passport-revoke)
+[![License](https://poser.pugx.org/jobilla/passport-revoke/license)](https://packagist.org/packages/jobilla/passport-revoke)
+
 This package provides a single Artisan command for revoking a set of
 active Laravel Passport tokens, to ease mass revocations. This can
 be useful if you add or remove claims from the JWT and need every
