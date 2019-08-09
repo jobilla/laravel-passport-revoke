@@ -1,4 +1,5 @@
 # Laravel Passport Revoke
+[![Build Status](https://travis-ci.org/jobilla/laravel-passport-revoke.svg?branch=master)](https://travis-ci.org/jobilla/laravel-passport-revoke)[![codecov](https://codecov.io/gh/jobilla/laravel-passport-revoke/branch/master/graph/badge.svg)](https://codecov.io/gh/jobilla/laravel-passport-revoke)
 
 [![Latest Stable Version](https://poser.pugx.org/jobilla/passport-revoke/v/stable)](https://packagist.org/packages/jobilla/passport-revoke)
 [![Build Status](https://travis-ci.org/jobilla/laravel-passport-revoke.svg?branch=master)](https://travis-ci.org/jobilla/laravel-passport-revoke)
