@@ -10,7 +10,6 @@ use Laravel\Passport\PassportServiceProvider;
 use Laravel\Passport\Token;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Orchestra\Testbench\TestCase;
-use Ramsey\Uuid\Uuid;
 
 class RevokePassportTokensTest extends TestCase
 {
@@ -18,15 +17,16 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_a_specific_token()
     {
-        $this->createTokens([
+        Token::query()->insert([
             [
-                'id' => 'f8097432-b83e-4503-9c83-e3906655a58b',
+                'id'        => 'f8097432-b83e-4503-9c83-e3906655a58b',
                 'client_id' => 1,
-                'revoked' => false,
+                'revoked'   => false,
             ],
             [
+                'id'        => 'd5bce45c-18f3-468d-958a-d8c9d29f5062',
                 'client_id' => 1,
-                'revoked' => false,
+                'revoked'   => false,
             ]
         ]);
 
@@ -38,20 +38,7 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_allows_revoking_all_tokens_if_no_conditions_are_passed()
     {
-        $this->createTokens([
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-            ],
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-            ],
-            [
-                'client_id' => 2,
-                'revoked' => 0,
-            ],
-        ]);
+        $this->createBaseTokens();
 
         $this->assertEquals(3, Token::query()->where('revoked', false)->count());
 
@@ -67,20 +54,7 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_does_not_revoke_all_tokens_if_the_user_does_not_confirm()
     {
-        $this->createTokens([
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-            ],
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-            ],
-            [
-                'client_id' => 2,
-                'revoked' => 0,
-            ],
-        ]);
+        $this->createBaseTokens();
 
         $this->assertEquals(3, Token::query()->where('revoked', false)->count());
 
@@ -96,32 +70,7 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_tokens_for_a_given_user()
     {
-        $this->createTokens([
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-                'user_id' => 1,
-            ],
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-                'user_id' => 1
-            ],
-            [
-                'client_id' => 2,
-                'revoked' => 0,
-                'user_id' => 2
-            ],
-        ]);
-
-        $this->assertEquals(
-            2,
-            Token::query()->where('revoked', false)->where('user_id', 1)->count()
-        );
-        $this->assertEquals(
-            1,
-            Token::query()->where('revoked', false)->where('user_id', 2)->count()
-        );
+        $this->createBaseTokens();
 
         $this->artisan(RevokePassportTokens::class, ['--user' => '1'])
             ->assertExitCode(0);
@@ -138,32 +87,7 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_tokens_for_a_given_client()
     {
-        $this->createTokens([
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-                'user_id' => 1,
-            ],
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-                'user_id' => 1
-            ],
-            [
-                'client_id' => 2,
-                'revoked' => 0,
-                'user_id' => 2
-            ],
-        ]);
-
-        $this->assertEquals(
-            2,
-            Token::query()->where('revoked', false)->where('client_id', 1)->count()
-        );
-        $this->assertEquals(
-            1,
-            Token::query()->where('revoked', false)->where('client_id', 2)->count()
-        );
+        $this->createBaseTokens();
 
         $this->artisan(RevokePassportTokens::class, ['--client' => '1'])
             ->assertExitCode(0);
@@ -180,35 +104,17 @@ class RevokePassportTokensTest extends TestCase
 
     public function test_it_can_revoke_tokens_for_a_given_client_and_user()
     {
-        $this->createTokens([
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-                'user_id' => 1,
-            ],
-            [
-                'client_id' => 1,
-                'revoked' => 0,
-                'user_id' => 1
-            ],
-            [
-                'client_id' => 2,
-                'revoked' => 0,
-                'user_id' => 1
-            ],
-            [
-                'client_id' => 2,
-                'revoked' => 0,
-                'user_id' => 2
-            ],
-        ]);
+        $this->createBaseTokens();
 
-        $this->assertEquals(4, Token::query()->where('revoked', false)->count());
+        $this->assertEquals(3, Token::query()->where('revoked', false)->count());
 
         $this->artisan(RevokePassportTokens::class, ['--client' => '2', '--user' => '1'])
             ->assertExitCode(0);
 
-        $this->assertEquals(1, Token::query()->where('revoked', true)->count());
+        $this->assertEquals(
+            1,
+            Token::query()->where('revoked', true)->where('client_id', 2)->count()
+        );
         $this->assertEquals(
             0,
             Token::query()->where('revoked', true)->where('client_id', 1)->count()
@@ -227,7 +133,7 @@ class RevokePassportTokensTest extends TestCase
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param \Illuminate\Foundation\Application $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -243,14 +149,30 @@ class RevokePassportTokensTest extends TestCase
         ]);
     }
 
-    private function createTokens(array $tokens)
+    private function createBaseTokens()
     {
-        Token::query()->insert(array_map(function ($token) {
-            return array_merge([
-                'id' => Uuid::uuid4()->toString(),
+        Token::query()->insert([
+            [
+                'id'         => '3c82ee60-f775-4eb3-9101-9ccc1583edf3',
+                'client_id'  => 1,
+                'revoked'    => 0,
+                'user_id'    => 1,
                 'expires_at' => Carbon::now()->addMonth(),
-                'user_id' => 1,
-            ], $token);
-        }, $tokens));
+            ],
+            [
+                'id'         => '62f8a4b4-dbb9-41d5-bd77-ad7d371e9fd0',
+                'client_id'  => 1,
+                'revoked'    => 0,
+                'user_id'    => 2,
+                'expires_at' => Carbon::now()->addMonth(),
+            ],
+            [
+                'id'         => '7ad5b60e-6e0c-465f-af27-1bd71848a704',
+                'client_id'  => 2,
+                'revoked'    => 0,
+                'user_id'    => 1,
+                'expires_at' => Carbon::now()->addMonth(),
+            ],
+        ]);
     }
 }
